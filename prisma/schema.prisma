@@ -1,0 +1,79 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  ADMIN
+  CUSTOMER
+}
+
+enum OrderStatus {
+  CREATED
+  PAID
+  CANCELLED
+  COMPLETED
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  password  String
+  role      UserRole @default(CUSTOMER)
+  createdAt DateTime @default(now())
+  orders    Order[]
+}
+
+model Category {
+  id          String    @id @default(cuid())
+  name        String
+  description String
+  products    Product[]
+}
+
+model Product {
+  id          String      @id @default(cuid())
+  name        String
+  description String
+  image       String      @default("")
+  thumbnail   String      @default("")
+  stock       Int         @default(0)
+  price       Decimal     @db.Decimal(12, 2)
+  active      Boolean     @default(true)
+  createdAt   DateTime    @default(now())
+  categoryId  String
+  category    Category    @relation(fields: [categoryId], references: [id])
+  orderItems  OrderItem[]
+}
+
+model Order {
+  id          String        @id @default(cuid())
+  userId      String
+  user        User          @relation(fields: [userId], references: [id])
+  status      OrderStatus   @default(CREATED)
+  totalAmount Decimal       @default(0) @db.Decimal(12, 2)
+  createdAt   DateTime      @default(now())
+  items       OrderItem[]
+
+  @@index([userId])
+}
+
+model OrderItem {
+  id        String  @id @default(cuid())
+  orderId   String
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+  quantity  Int
+  unitPrice Decimal @db.Decimal(12, 2)
+  subtotal  Decimal @db.Decimal(12, 2)
+
+  @@unique([orderId, productId])
+  @@index([orderId])
+  @@index([productId])
+}
