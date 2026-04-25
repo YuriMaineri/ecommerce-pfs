@@ -1,5 +1,6 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Product } from '../../../../domain/entities/product.entity';
+import { CategoryResponse } from '../../categories/dto/category.response';
 
 export class ProductResponse {
   @ApiProperty()
@@ -32,6 +33,9 @@ export class ProductResponse {
   @ApiProperty()
   categoryId!: string;
 
+  @ApiPropertyOptional({ type: CategoryResponse })
+  category?: CategoryResponse;
+
   static fromDomain(p: Product): ProductResponse {
     const dto = new ProductResponse();
     dto.id = p.id;
@@ -44,6 +48,9 @@ export class ProductResponse {
     dto.active = p.active;
     dto.createdAt = p.createdAt;
     dto.categoryId = p.categoryId;
+    if (p.category) {
+      dto.category = CategoryResponse.fromDomain(p.category);
+    }
     return dto;
   }
 }

@@ -20,12 +20,16 @@ export class PrismaProductRepository implements IProductRepository {
         active: product.active,
         categoryId: product.categoryId,
       },
+      include: { category: true },
     });
     return ProductMapper.toDomain(created);
   }
 
   async findById(id: string): Promise<Product | null> {
-    const row = await this.prisma.product.findUnique({ where: { id } });
+    const row = await this.prisma.product.findUnique({
+      where: { id },
+      include: { category: true },
+    });
     return row ? ProductMapper.toDomain(row) : null;
   }
 
@@ -39,6 +43,7 @@ export class PrismaProductRepository implements IProductRepository {
       skip: params?.skip,
       take: params?.take,
       orderBy: { createdAt: 'desc' },
+      include: { category: true },
     });
     return rows.map(ProductMapper.toDomain);
   }
@@ -58,6 +63,7 @@ export class PrismaProductRepository implements IProductRepository {
   ): Promise<Product> {
     const updated = await this.prisma.product.update({
       where: { id },
+      include: { category: true },
       data: {
         ...(data.name !== undefined ? { name: data.name } : {}),
         ...(data.description !== undefined

@@ -3,6 +3,7 @@ import {
   InsufficientStockError,
   ProductInactiveError,
 } from '../errors/application.errors';
+import { Category } from './category.entity';
 
 export class Product {
   constructor(
@@ -16,6 +17,7 @@ export class Product {
     public active: boolean,
     public readonly createdAt: Date,
     public categoryId: string,
+    public readonly category?: Category,
   ) {}
 
   assertNonNegativeStock(): void {
