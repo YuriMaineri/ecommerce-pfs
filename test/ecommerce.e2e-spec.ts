@@ -40,7 +40,9 @@ describe('E-commerce API (e2e)', () => {
   });
 
   afterAll(async () => {
-    await app.close();
+    if (app) {
+      await app.close();
+    }
   });
 
   it('should reject protected routes without token', async () => {
@@ -101,7 +103,9 @@ describe('E-commerce API (e2e)', () => {
       .set('Authorization', `Bearer ${adminToken}`)
       .attach('file', png, 'tiny.png')
       .expect(200);
-    expect(res.body.image).toContain('/uploads/products/');
+    expect(res.body.image).toContain(
+      `/${process.env.SUPABASE_STORAGE_BUCKET ?? 'productsImages'}/`,
+    );
   });
 
   it('should upload product thumbnail', async () => {
@@ -114,7 +118,9 @@ describe('E-commerce API (e2e)', () => {
       .set('Authorization', `Bearer ${adminToken}`)
       .attach('file', png, 'tiny.png')
       .expect(200);
-    expect(res.body.thumbnail).toContain('/uploads/products/');
+    expect(res.body.thumbnail).toContain(
+      `/${process.env.SUPABASE_STORAGE_BUCKET ?? 'productsImages'}/`,
+    );
   });
 
   it('should create order as customer', async () => {

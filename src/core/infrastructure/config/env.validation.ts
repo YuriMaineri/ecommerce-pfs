@@ -10,6 +10,15 @@ class EnvironmentVariables {
 
   @IsString()
   JWT_EXPIRES_IN!: string;
+
+  @IsString()
+  SUPABASE_URL!: string;
+
+  @IsString()
+  SUPABASE_SERVICE_ROLE_KEY!: string;
+
+  @IsString()
+  SUPABASE_STORAGE_BUCKET!: string;
 }
 
 export function validateEnv(

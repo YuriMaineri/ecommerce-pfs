@@ -1,14 +1,12 @@
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
-import { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { join } from 'path';
 import { AppModule } from './app.module';
 import { DomainExceptionFilter } from './core/presentation/http/filters/domain-exception.filter';
 import { HttpExceptionLoggingFilter } from './core/presentation/http/filters/http-exception.filter';
 
 async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  const app = await NestFactory.create(AppModule);
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -20,10 +18,6 @@ async function bootstrap() {
     new DomainExceptionFilter(),
     new HttpExceptionLoggingFilter(),
   );
-  app.useStaticAssets(join(__dirname, '..', 'uploads'), {
-    prefix: '/uploads/',
-  });
-
   const swaggerConfig = new DocumentBuilder()
     .setTitle('E-commerce API')
     .setDescription(

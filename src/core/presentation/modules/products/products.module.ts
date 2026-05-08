@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { CreateProductUseCase } from '../../../application/use-cases/products/create-product.use-case';
 import { DeleteProductUseCase } from '../../../application/use-cases/products/delete-product.use-case';
 import { GetProductUseCase } from '../../../application/use-cases/products/get-product.use-case';
@@ -7,7 +8,7 @@ import { UpdateProductUseCase } from '../../../application/use-cases/products/up
 import { UploadProductImageUseCase } from '../../../application/use-cases/products/upload-product-image.use-case';
 import { UploadProductThumbnailUseCase } from '../../../application/use-cases/products/upload-product-thumbnail.use-case';
 import { FILE_STORAGE } from '../../../application/injection-tokens';
-import { LocalFileStorage } from '../../../infrastructure/upload/local-file.storage';
+import { SupabaseFileStorage } from '../../../infrastructure/upload/supabase-file.storage';
 import { AuthModule } from '../auth/auth.module';
 import { RepositoriesModule } from '../repositories.module';
 import { ProductsController } from './products.controller';
@@ -16,8 +17,11 @@ import { ProductsController } from './products.controller';
   imports: [RepositoriesModule, AuthModule],
   controllers: [ProductsController],
   providers: [
-    LocalFileStorage,
-    { provide: FILE_STORAGE, useExisting: LocalFileStorage },
+    {
+      provide: FILE_STORAGE,
+      useFactory: (config: ConfigService) => new SupabaseFileStorage(config),
+      inject: [ConfigService],
+    },
     CreateProductUseCase,
     ListProductsUseCase,
     GetProductUseCase,
