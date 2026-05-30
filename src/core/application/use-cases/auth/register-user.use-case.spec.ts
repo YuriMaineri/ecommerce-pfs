@@ -17,6 +17,8 @@ describe('RegisterUserUseCase', () => {
     findAll: jest.fn(),
     update: jest.fn(),
     delete: jest.fn(),
+    findDeleted: jest.fn(),
+    restore: jest.fn(),
   };
   const hasher: jest.Mocked<IPasswordHasher> = {
     hash: jest.fn(),

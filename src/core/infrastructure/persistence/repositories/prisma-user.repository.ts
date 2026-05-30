@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { User } from '../../../domain/entities/user.entity';
+import { UserRole } from '../../../domain/enums/user-role.enum';
 import { EmailAlreadyExistsError } from '../../../domain/errors/application.errors';
 import { IUserRepository } from '../../../domain/repositories/user.repository.interface';
 import { UserMapper } from '../mappers/user.mapper';
@@ -33,17 +34,23 @@ export class PrismaUserRepository implements IUserRepository {
   }
 
   async findByEmail(email: string): Promise<User | null> {
-    const row = await this.prisma.user.findUnique({ where: { email } });
+    // Usuarios excluidos logicamente nao autenticam nem aparecem em buscas.
+    const row = await this.prisma.user.findFirst({
+      where: { email, deletedAt: null },
+    });
     return row ? UserMapper.toDomain(row) : null;
   }
 
   async findById(id: string): Promise<User | null> {
-    const row = await this.prisma.user.findUnique({ where: { id } });
+    const row = await this.prisma.user.findFirst({
+      where: { id, deletedAt: null },
+    });
     return row ? UserMapper.toDomain(row) : null;
   }
 
   async findAll(): Promise<User[]> {
     const rows = await this.prisma.user.findMany({
+      where: { deletedAt: null },
       orderBy: { createdAt: 'desc' },
     });
     return rows.map(UserMapper.toDomain);
@@ -51,7 +58,12 @@ export class PrismaUserRepository implements IUserRepository {
 
   async update(
     id: string,
-    data: Partial<{ name: string; email: string; passwordHash: string }>,
+    data: Partial<{
+      name: string;
+      email: string;
+      passwordHash: string;
+      role: UserRole;
+    }>,
   ): Promise<User> {
     try {
       const updated = await this.prisma.user.update({
@@ -62,6 +74,7 @@ export class PrismaUserRepository implements IUserRepository {
           ...(data.passwordHash !== undefined
             ? { password: data.passwordHash }
             : {}),
+          ...(data.role !== undefined ? { role: data.role } : {}),
         },
       });
       return UserMapper.toDomain(updated);
@@ -77,6 +90,26 @@ export class PrismaUserRepository implements IUserRepository {
   }
 
   async delete(id: string): Promise<void> {
-    await this.prisma.user.delete({ where: { id } });
+    // Exclusao logica.
+    await this.prisma.user.update({
+      where: { id },
+      data: { deletedAt: new Date() },
+    });
+  }
+
+  async findDeleted(): Promise<User[]> {
+    const rows = await this.prisma.user.findMany({
+      where: { deletedAt: { not: null } },
+      orderBy: { createdAt: 'desc' },
+    });
+    return rows.map(UserMapper.toDomain);
+  }
+
+  async restore(id: string): Promise<User> {
+    const restored = await this.prisma.user.update({
+      where: { id },
+      data: { deletedAt: null },
+    });
+    return UserMapper.toDomain(restored);
   }
 }

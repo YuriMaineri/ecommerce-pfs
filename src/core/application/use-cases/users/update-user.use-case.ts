@@ -14,6 +14,7 @@ export interface UpdateUserInput {
   name?: string;
   email?: string;
   password?: string;
+  role?: UserRole;
   actorUserId: string;
   actorRole: UserRole;
 }
@@ -39,13 +40,33 @@ export class UpdateUserUseCase {
         throw new EmailAlreadyExistsError();
       }
     }
-    const data: Partial<{ name: string; email: string; passwordHash: string }> =
-      {};
+
+    // Apenas ADMIN pode alterar papel; e ninguem pode rebaixar a si mesmo
+    // (evita o cenario de ficar sem nenhum administrador por engano).
+    if (input.role !== undefined && input.role !== user.role) {
+      if (input.actorRole !== UserRole.ADMIN) {
+        throw new ForbiddenAccessError('Only admins can change user roles');
+      }
+      if (
+        user.id === input.actorUserId &&
+        input.role !== UserRole.ADMIN
+      ) {
+        throw new ForbiddenAccessError('You cannot demote your own account');
+      }
+    }
+
+    const data: Partial<{
+      name: string;
+      email: string;
+      passwordHash: string;
+      role: UserRole;
+    }> = {};
     if (input.name !== undefined) data.name = input.name;
     if (input.email !== undefined) data.email = input.email.toLowerCase();
     if (input.password !== undefined) {
       data.passwordHash = await this.passwordHasher.hash(input.password);
     }
+    if (input.role !== undefined) data.role = input.role;
     return this.users.update(user.id, data);
   }
 }

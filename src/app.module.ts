@@ -5,6 +5,7 @@ import { PrismaModule } from './core/infrastructure/persistence/prisma/prisma.mo
 import { AuthModule } from './core/presentation/modules/auth/auth.module';
 import { CategoriesModule } from './core/presentation/modules/categories/categories.module';
 import { OrdersModule } from './core/presentation/modules/orders/orders.module';
+import { PaymentsModule } from './core/presentation/modules/payments/payments.module';
 import { ProductsModule } from './core/presentation/modules/products/products.module';
 import { UsersModule } from './core/presentation/modules/users/users.module';
 
@@ -20,6 +21,7 @@ import { UsersModule } from './core/presentation/modules/users/users.module';
     CategoriesModule,
     ProductsModule,
     OrdersModule,
+    PaymentsModule,
   ],
 })
 export class AppModule {}

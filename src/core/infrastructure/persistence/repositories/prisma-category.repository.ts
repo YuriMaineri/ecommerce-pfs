@@ -19,12 +19,15 @@ export class PrismaCategoryRepository implements ICategoryRepository {
   }
 
   async findById(id: string): Promise<Category | null> {
-    const row = await this.prisma.category.findUnique({ where: { id } });
+    const row = await this.prisma.category.findFirst({
+      where: { id, deletedAt: null },
+    });
     return row ? CategoryMapper.toDomain(row) : null;
   }
 
   async findAll(): Promise<Category[]> {
     const rows = await this.prisma.category.findMany({
+      where: { deletedAt: null },
       orderBy: { name: 'asc' },
     });
     return rows.map(CategoryMapper.toDomain);
@@ -47,10 +50,33 @@ export class PrismaCategoryRepository implements ICategoryRepository {
   }
 
   async delete(id: string): Promise<void> {
-    await this.prisma.category.delete({ where: { id } });
+    // Exclusao logica.
+    await this.prisma.category.update({
+      where: { id },
+      data: { deletedAt: new Date() },
+    });
   }
 
   async countProducts(categoryId: string): Promise<number> {
-    return this.prisma.product.count({ where: { categoryId } });
+    // Considera apenas produtos ativos (nao excluidos logicamente).
+    return this.prisma.product.count({
+      where: { categoryId, deletedAt: null },
+    });
+  }
+
+  async findDeleted(): Promise<Category[]> {
+    const rows = await this.prisma.category.findMany({
+      where: { deletedAt: { not: null } },
+      orderBy: { name: 'asc' },
+    });
+    return rows.map(CategoryMapper.toDomain);
+  }
+
+  async restore(id: string): Promise<Category> {
+    const restored = await this.prisma.category.update({
+      where: { id },
+      data: { deletedAt: null },
+    });
+    return CategoryMapper.toDomain(restored);
   }
 }

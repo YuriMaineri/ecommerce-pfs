@@ -3,7 +3,9 @@ import { ConfigService } from '@nestjs/config';
 import { CreateProductUseCase } from '../../../application/use-cases/products/create-product.use-case';
 import { DeleteProductUseCase } from '../../../application/use-cases/products/delete-product.use-case';
 import { GetProductUseCase } from '../../../application/use-cases/products/get-product.use-case';
+import { ListDeletedProductsUseCase } from '../../../application/use-cases/products/list-deleted-products.use-case';
 import { ListProductsUseCase } from '../../../application/use-cases/products/list-products.use-case';
+import { RestoreProductUseCase } from '../../../application/use-cases/products/restore-product.use-case';
 import { UpdateProductUseCase } from '../../../application/use-cases/products/update-product.use-case';
 import { UploadProductImageUseCase } from '../../../application/use-cases/products/upload-product-image.use-case';
 import { UploadProductThumbnailUseCase } from '../../../application/use-cases/products/upload-product-thumbnail.use-case';
@@ -29,6 +31,8 @@ import { ProductsController } from './products.controller';
     DeleteProductUseCase,
     UploadProductImageUseCase,
     UploadProductThumbnailUseCase,
+    ListDeletedProductsUseCase,
+    RestoreProductUseCase,
   ],
 })
 export class ProductsModule {}

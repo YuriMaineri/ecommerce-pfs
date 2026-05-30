@@ -1,5 +1,5 @@
 import { plainToInstance } from 'class-transformer';
-import { IsString, validateSync } from 'class-validator';
+import { IsOptional, IsString, validateSync } from 'class-validator';
 
 class EnvironmentVariables {
   @IsString()
@@ -19,6 +19,16 @@ class EnvironmentVariables {
 
   @IsString()
   SUPABASE_STORAGE_BUCKET!: string;
+
+  // URL base do proprio backend (usada pelo gateway simulado para chamar o webhook).
+  @IsOptional()
+  @IsString()
+  APP_URL?: string;
+
+  // Token estatico opcional para proteger o webhook de pagamentos.
+  @IsOptional()
+  @IsString()
+  PAYMENT_WEBHOOK_TOKEN?: string;
 }
 
 export function validateEnv(

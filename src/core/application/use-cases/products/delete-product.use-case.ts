@@ -1,5 +1,4 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { ProductReferencedError } from '../../../domain/errors/application.errors';
 import { ResourceNotFoundError } from '../../../domain/errors/application.errors';
 import { PRODUCT_REPOSITORY } from '../../../domain/repositories/injection-tokens';
 import { IProductRepository } from '../../../domain/repositories/product.repository.interface';
@@ -15,10 +14,8 @@ export class DeleteProductUseCase {
     if (!existing) {
       throw new ResourceNotFoundError('Product', id);
     }
-    const refs = await this.products.countOrderItemReferences(id);
-    if (refs > 0) {
-      throw new ProductReferencedError();
-    }
+    // Exclusao logica: segura mesmo que o produto ja apareca em pedidos,
+    // pois a linha permanece no banco (apenas marcada como excluida).
     await this.products.delete(id);
   }
 }

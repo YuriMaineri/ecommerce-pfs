@@ -5,13 +5,16 @@ import {
   Get,
   HttpCode,
   Param,
+  Post,
   Put,
   UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { DeleteUserUseCase } from '../../../application/use-cases/users/delete-user.use-case';
 import { GetUserByIdUseCase } from '../../../application/use-cases/users/get-user-by-id.use-case';
+import { ListDeletedUsersUseCase } from '../../../application/use-cases/users/list-deleted-users.use-case';
 import { ListUsersUseCase } from '../../../application/use-cases/users/list-users.use-case';
+import { RestoreUserUseCase } from '../../../application/use-cases/users/restore-user.use-case';
 import { UpdateUserUseCase } from '../../../application/use-cases/users/update-user.use-case';
 import { UserRole } from '../../../domain/enums/user-role.enum';
 import {
@@ -34,6 +37,8 @@ export class UsersController {
     private readonly getUserById: GetUserByIdUseCase,
     private readonly updateUser: UpdateUserUseCase,
     private readonly deleteUser: DeleteUserUseCase,
+    private readonly listDeletedUsers: ListDeletedUsersUseCase,
+    private readonly restoreUser: RestoreUserUseCase,
   ) {}
 
   @Get()
@@ -42,6 +47,23 @@ export class UsersController {
   async list(): Promise<UserPublicResponse[]> {
     const users = await this.listUsers.execute();
     return users.map(UserPublicResponse.fromDomain);
+  }
+
+  @Get('deleted')
+  @Roles(UserRole.ADMIN)
+  @ApiOperation({ summary: 'List soft-deleted users (ADMIN)' })
+  async listDeleted(): Promise<UserPublicResponse[]> {
+    const users = await this.listDeletedUsers.execute();
+    return users.map(UserPublicResponse.fromDomain);
+  }
+
+  @Post(':id/restore')
+  @HttpCode(200)
+  @Roles(UserRole.ADMIN)
+  @ApiOperation({ summary: 'Restore a soft-deleted user (ADMIN)' })
+  async restore(@Param('id') id: string): Promise<UserPublicResponse> {
+    const user = await this.restoreUser.execute(id);
+    return UserPublicResponse.fromDomain(user);
   }
 
   @Get(':id')
