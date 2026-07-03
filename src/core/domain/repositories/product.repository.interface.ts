@@ -8,7 +8,7 @@ export interface ProductFilters {
   search?: string;
   minPrice?: number;
   maxPrice?: number;
-  /** Quando definido, filtra por produtos ativos/inativos. */
+
   active?: boolean;
   sortBy?: ProductSortBy;
   order?: SortOrder;
@@ -29,7 +29,7 @@ export interface IProductRepository {
     skip?: number;
     take?: number;
   }): Promise<Product[]>;
-  /** Lista paginada e filtrada (ignora excluidos logicamente). */
+
   findPaginated(filters: ProductFilters): Promise<PaginatedProducts>;
   update(
     id: string,
@@ -46,8 +46,8 @@ export interface IProductRepository {
   ): Promise<Product>;
   delete(id: string): Promise<void>;
   countOrderItemReferences(productId: string): Promise<number>;
-  /** Lista apenas os registros excluidos logicamente. */
+
   findDeleted(): Promise<Product[]>;
-  /** Restaura um registro excluido logicamente (deletedAt -> null). */
+
   restore(id: string): Promise<Product>;
 }

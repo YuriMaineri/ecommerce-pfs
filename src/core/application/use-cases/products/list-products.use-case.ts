@@ -6,6 +6,11 @@ import {
   ProductSortBy,
   SortOrder,
 } from '../../../domain/repositories/product.repository.interface';
+import { CACHE_SERVICE } from '../../injection-tokens';
+import { ICacheService } from '../../ports/cache.port';
+
+export const PRODUCTS_LIST_CACHE_PREFIX = 'products:list:';
+const PRODUCTS_LIST_CACHE_TTL = 60;
 
 export interface ListProductsQuery {
   categoryId?: string;
@@ -35,6 +40,7 @@ const MAX_PAGE_SIZE = 100;
 export class ListProductsUseCase {
   constructor(
     @Inject(PRODUCT_REPOSITORY) private readonly products: IProductRepository,
+    @Inject(CACHE_SERVICE) private readonly cache: ICacheService,
   ) {}
 
   async execute(
@@ -46,7 +52,7 @@ export class ListProductsUseCase {
       MAX_PAGE_SIZE,
     );
 
-    const { items, total } = await this.products.findPaginated({
+    const filters = {
       categoryId: query.categoryId,
       search: query.search,
       minPrice: query.minPrice,
@@ -56,14 +62,24 @@ export class ListProductsUseCase {
       order: query.order,
       page,
       pageSize,
-    });
+    };
 
-    return {
+    const cacheKey = PRODUCTS_LIST_CACHE_PREFIX + JSON.stringify(filters);
+    const cached = await this.cache.get<PaginatedResult<Product>>(cacheKey);
+    if (cached) {
+      return cached;
+    }
+
+    const { items, total } = await this.products.findPaginated(filters);
+    const result: PaginatedResult<Product> = {
       items,
       total,
       page,
       pageSize,
       totalPages: Math.max(1, Math.ceil(total / pageSize)),
     };
+
+    await this.cache.set(cacheKey, result, PRODUCTS_LIST_CACHE_TTL);
+    return result;
   }
 }

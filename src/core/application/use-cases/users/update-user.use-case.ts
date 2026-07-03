@@ -41,8 +41,6 @@ export class UpdateUserUseCase {
       }
     }
 
-    // Apenas ADMIN pode alterar papel; e ninguem pode rebaixar a si mesmo
-    // (evita o cenario de ficar sem nenhum administrador por engano).
     if (input.role !== undefined && input.role !== user.role) {
       if (input.actorRole !== UserRole.ADMIN) {
         throw new ForbiddenAccessError('Only admins can change user roles');

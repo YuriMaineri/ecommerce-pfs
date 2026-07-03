@@ -31,7 +31,7 @@ export class PrismaProductRepository implements IProductRepository {
   }
 
   async findById(id: string): Promise<Product | null> {
-    // Ignora produtos com exclusao logica.
+
     const row = await this.prisma.product.findFirst({
       where: { id, deletedAt: null },
       include: { category: true },
@@ -132,7 +132,7 @@ export class PrismaProductRepository implements IProductRepository {
   }
 
   async delete(id: string): Promise<void> {
-    // Exclusao logica: marca a data em vez de remover do banco.
+
     await this.prisma.product.update({
       where: { id },
       data: { deletedAt: new Date() },

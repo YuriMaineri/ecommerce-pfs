@@ -8,6 +8,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { Throttle } from '@nestjs/throttler';
 import { GetProfileUseCase } from '../../../application/use-cases/auth/get-profile.use-case';
 import { LoginUserUseCase } from '../../../application/use-cases/auth/login-user.use-case';
 import { RegisterUserUseCase } from '../../../application/use-cases/auth/register-user.use-case';
@@ -30,6 +31,7 @@ export class AuthController {
   ) {}
 
   @Post('register')
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
   @ApiOperation({ summary: 'Register a new customer account' })
   async register(@Body() body: RegisterDto): Promise<UserPublicResponse> {
     const user = await this.registerUser.execute(body);
@@ -37,6 +39,7 @@ export class AuthController {
   }
 
   @Post('login')
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Authenticate and receive JWT' })
   async login(@Body() body: LoginDto) {

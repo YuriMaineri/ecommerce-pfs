@@ -10,8 +10,8 @@ export interface ICategoryRepository {
   ): Promise<Category>;
   delete(id: string): Promise<void>;
   countProducts(categoryId: string): Promise<number>;
-  /** Lista apenas as categorias excluidas logicamente. */
+
   findDeleted(): Promise<Category[]>;
-  /** Restaura uma categoria excluida logicamente. */
+
   restore(id: string): Promise<Category>;
 }

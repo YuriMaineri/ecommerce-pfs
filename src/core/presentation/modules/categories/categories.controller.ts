@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  Header,
   HttpCode,
   Param,
   Post,
@@ -70,6 +71,8 @@ export class CategoriesController {
   }
 
   @Get()
+
+  @Header('Cache-Control', 'public, max-age=60, stale-while-revalidate=120')
   @ApiOperation({ summary: 'List categories' })
   async list(): Promise<CategoryResponse[]> {
     const rows = await this.listCategories.execute();

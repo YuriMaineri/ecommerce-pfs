@@ -90,7 +90,6 @@ export class PrismaPaymentRepository implements IPaymentRepository {
         throw new ResourceNotFoundError('Payment', reference);
       }
 
-      // Idempotencia: se ja foi processado, nao reaplica.
       if (payment.status !== PrismaPaymentStatus.PENDING) {
         return {
           order: OrderMapper.toDomain(payment.order),
@@ -102,7 +101,7 @@ export class PrismaPaymentRepository implements IPaymentRepository {
       const newPaymentStatus = approved
         ? PrismaPaymentStatus.APPROVED
         : PrismaPaymentStatus.DECLINED;
-      // Aprovado -> pedido PAID. Recusado -> volta para CREATED (carrinho editavel).
+
       const newOrderStatus = approved
         ? PrismaOrderStatus.PAID
         : PrismaOrderStatus.CREATED;

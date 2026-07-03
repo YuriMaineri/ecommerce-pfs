@@ -50,7 +50,7 @@ export class PrismaCategoryRepository implements ICategoryRepository {
   }
 
   async delete(id: string): Promise<void> {
-    // Exclusao logica.
+
     await this.prisma.category.update({
       where: { id },
       data: { deletedAt: new Date() },
@@ -58,7 +58,7 @@ export class PrismaCategoryRepository implements ICategoryRepository {
   }
 
   async countProducts(categoryId: string): Promise<number> {
-    // Considera apenas produtos ativos (nao excluidos logicamente).
+
     return this.prisma.product.count({
       where: { categoryId, deletedAt: null },
     });

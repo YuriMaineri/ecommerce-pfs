@@ -5,6 +5,9 @@ import { ICategoryRepository } from '../../../domain/repositories/category.repos
 import { CATEGORY_REPOSITORY } from '../../../domain/repositories/injection-tokens';
 import { PRODUCT_REPOSITORY } from '../../../domain/repositories/injection-tokens';
 import { IProductRepository } from '../../../domain/repositories/product.repository.interface';
+import { CACHE_SERVICE } from '../../injection-tokens';
+import { ICacheService } from '../../ports/cache.port';
+import { PRODUCTS_LIST_CACHE_PREFIX } from './list-products.use-case';
 
 export interface CreateProductInput {
   name: string;
@@ -23,6 +26,7 @@ export class CreateProductUseCase {
     @Inject(PRODUCT_REPOSITORY) private readonly products: IProductRepository,
     @Inject(CATEGORY_REPOSITORY)
     private readonly categories: ICategoryRepository,
+    @Inject(CACHE_SERVICE) private readonly cache: ICacheService,
   ) {}
 
   async execute(input: CreateProductInput): Promise<Product> {
@@ -44,6 +48,9 @@ export class CreateProductUseCase {
     );
     product.assertNonNegativeStock();
     product.assertPositivePrice();
-    return this.products.create(product);
+    const created = await this.products.create(product);
+
+    await this.cache.delByPrefix(PRODUCTS_LIST_CACHE_PREFIX);
+    return created;
   }
 }

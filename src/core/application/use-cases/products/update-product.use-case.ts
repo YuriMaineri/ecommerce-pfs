@@ -5,6 +5,9 @@ import { ICategoryRepository } from '../../../domain/repositories/category.repos
 import { CATEGORY_REPOSITORY } from '../../../domain/repositories/injection-tokens';
 import { PRODUCT_REPOSITORY } from '../../../domain/repositories/injection-tokens';
 import { IProductRepository } from '../../../domain/repositories/product.repository.interface';
+import { CACHE_SERVICE } from '../../injection-tokens';
+import { ICacheService } from '../../ports/cache.port';
+import { PRODUCTS_LIST_CACHE_PREFIX } from './list-products.use-case';
 
 export interface UpdateProductInput {
   id: string;
@@ -24,6 +27,7 @@ export class UpdateProductUseCase {
     @Inject(PRODUCT_REPOSITORY) private readonly products: IProductRepository,
     @Inject(CATEGORY_REPOSITORY)
     private readonly categories: ICategoryRepository,
+    @Inject(CACHE_SERVICE) private readonly cache: ICacheService,
   ) {}
 
   async execute(input: UpdateProductInput): Promise<Product> {
@@ -51,7 +55,7 @@ export class UpdateProductUseCase {
     );
     next.assertNonNegativeStock();
     next.assertPositivePrice();
-    return this.products.update(input.id, {
+    const updated = await this.products.update(input.id, {
       name: input.name,
       description: input.description,
       image: input.image,
@@ -61,5 +65,7 @@ export class UpdateProductUseCase {
       active: input.active,
       categoryId: input.categoryId,
     });
+    await this.cache.delByPrefix(PRODUCTS_LIST_CACHE_PREFIX);
+    return updated;
   }
 }

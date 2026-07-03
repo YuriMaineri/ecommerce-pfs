@@ -3,11 +3,6 @@ import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { GatewayChargeDto } from './dto/gateway-charge.dto';
 import { GatewayService } from './gateway.service';
 
-/**
- * Gateway de pagamento SIMULADO. Endpoint publico que imita a pagina de
- * checkout de um provedor externo. Recebe o cartao, decide o desfecho e
- * notifica o webhook do backend de forma assincrona.
- */
 @ApiTags('gateway (simulado)')
 @Controller('gateway')
 export class GatewayController {
@@ -22,7 +17,7 @@ export class GatewayController {
   } {
     const approved = this.gateway.decideApproval(body.cardNumber);
     this.gateway.scheduleWebhook(body.reference, approved);
-    // Resposta imediata: o resultado real chega de forma assincrona pelo webhook.
+
     return { status: 'processing', reference: body.reference };
   }
 }

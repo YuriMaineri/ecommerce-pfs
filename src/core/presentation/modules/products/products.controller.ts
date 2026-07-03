@@ -4,6 +4,7 @@ import {
   Controller,
   Delete,
   Get,
+  Header,
   HttpCode,
   HttpStatus,
   Param,
@@ -89,6 +90,8 @@ export class ProductsController {
   }
 
   @Get()
+
+  @Header('Cache-Control', 'public, max-age=60, stale-while-revalidate=120')
   @ApiOperation({ summary: 'List products (paginated + filters)' })
   async list(
     @Query() query: ListProductsQueryDto,

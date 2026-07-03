@@ -34,7 +34,7 @@ export class PrismaUserRepository implements IUserRepository {
   }
 
   async findByEmail(email: string): Promise<User | null> {
-    // Usuarios excluidos logicamente nao autenticam nem aparecem em buscas.
+
     const row = await this.prisma.user.findFirst({
       where: { email, deletedAt: null },
     });
@@ -90,7 +90,7 @@ export class PrismaUserRepository implements IUserRepository {
   }
 
   async delete(id: string): Promise<void> {
-    // Exclusao logica.
+
     await this.prisma.user.update({
       where: { id },
       data: { deletedAt: new Date() },

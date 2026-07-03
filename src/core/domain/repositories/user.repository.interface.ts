@@ -16,8 +16,8 @@ export interface IUserRepository {
     }>,
   ): Promise<User>;
   delete(id: string): Promise<void>;
-  /** Lista apenas os usuarios excluidos logicamente. */
+
   findDeleted(): Promise<User[]>;
-  /** Restaura um usuario excluido logicamente. */
+
   restore(id: string): Promise<User>;
 }

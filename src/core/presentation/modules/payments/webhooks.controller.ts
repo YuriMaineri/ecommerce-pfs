@@ -12,10 +12,6 @@ import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ProcessPaymentWebhookUseCase } from '../../../application/use-cases/payments/process-payment-webhook.use-case';
 import { PaymentWebhookDto } from './dto/payment-webhook.dto';
 
-/**
- * Recebe a notificacao do gateway. Endpoint PUBLICO (fora do JWT), protegido
- * por um token estatico no header e idempotente no processamento.
- */
 @ApiTags('webhooks')
 @Controller('webhooks')
 export class WebhooksController {
@@ -32,7 +28,7 @@ export class WebhooksController {
     @Headers('x-webhook-token') token?: string,
   ): Promise<{ received: boolean; orderStatus: string; alreadyProcessed: boolean }> {
     const expected = this.config.get<string>('PAYMENT_WEBHOOK_TOKEN');
-    // Se um token estiver configurado, ele e obrigatorio e deve bater.
+
     if (expected && token !== expected) {
       throw new UnauthorizedException('Invalid webhook token');
     }

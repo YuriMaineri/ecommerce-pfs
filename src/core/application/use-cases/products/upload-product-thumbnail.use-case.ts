@@ -2,13 +2,15 @@ import { Inject, Injectable } from '@nestjs/common';
 import { Product } from '../../../domain/entities/product.entity';
 import { ResourceNotFoundError } from '../../../domain/errors/application.errors';
 import { InvalidFileUploadError } from '../../../domain/errors/application.errors';
-import { FILE_STORAGE } from '../../injection-tokens';
+import { CACHE_SERVICE, FILE_STORAGE } from '../../injection-tokens';
 import { PRODUCT_REPOSITORY } from '../../../domain/repositories/injection-tokens';
 import { IProductRepository } from '../../../domain/repositories/product.repository.interface';
+import { ICacheService } from '../../ports/cache.port';
 import {
   IFileStoragePort,
   UploadedFilePayload,
 } from '../../ports/file-storage.port';
+import { PRODUCTS_LIST_CACHE_PREFIX } from './list-products.use-case';
 
 const ALLOWED = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/jpg']);
 
@@ -17,6 +19,7 @@ export class UploadProductThumbnailUseCase {
   constructor(
     @Inject(PRODUCT_REPOSITORY) private readonly products: IProductRepository,
     @Inject(FILE_STORAGE) private readonly storage: IFileStoragePort,
+    @Inject(CACHE_SERVICE) private readonly cache: ICacheService,
   ) {}
 
   async execute(
@@ -34,6 +37,8 @@ export class UploadProductThumbnailUseCase {
       );
     }
     const path = await this.storage.saveProductThumbnail(productId, file);
-    return this.products.update(productId, { thumbnail: path });
+    const updated = await this.products.update(productId, { thumbnail: path });
+    await this.cache.delByPrefix(PRODUCTS_LIST_CACHE_PREFIX);
+    return updated;
   }
 }

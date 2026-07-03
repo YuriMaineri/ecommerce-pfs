@@ -39,7 +39,7 @@ describe('UpdateUserUseCase (role rules)', () => {
       ],
     }).compile();
     useCase = moduleRef.get(UpdateUserUseCase);
-    // update por padrao apenas ecoa os dados aplicados sobre o usuario alvo.
+
     users.update.mockImplementation(async (id, data) => {
       const base = makeUser(id, data.role ?? UserRole.CUSTOMER);
       return new User(
